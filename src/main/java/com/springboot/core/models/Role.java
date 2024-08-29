@@ -1,18 +1,15 @@
 package com.springboot.core.models;
 
-import java.util.Set;
-import java.util.HashSet;
+import java.util.Date;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.Data;
 
 @Entity
@@ -23,14 +20,30 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private RoleName name;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_date", nullable = false)
+    private Date createdDate;
 
-    public enum RoleName {
-        USER, ADMIN, SUPER_ADMIN
-    }
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "updated_date")
+    private Date updatedDate;
 
-    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
-    private Set<UserDepartmentRole> userDepartmentRoles = new HashSet<>();
+    @Column(name = "created_by")
+    private Integer createdBy;
+
+    @Column(name = "updated_by")
+    private Integer updatedBy;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "deleted_date")
+    private Date deletedDate;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @Column(name = "code", nullable = false)
+    private String code;
+
+    @Column(name = "recovery_config_id")
+    private Integer recoveryConfigId;
 }

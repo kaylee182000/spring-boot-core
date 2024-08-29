@@ -1,22 +1,33 @@
 package com.springboot.core.models;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import java.util.Date;
 
-@RequiredArgsConstructor
-public enum Permission {
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import lombok.Data;
 
-    ADMIN_READ("admin:read"),
-    ADMIN_UPDATE("admin:update"),
-    ADMIN_CREATE("admin:create"),
-    ADMIN_DELETE("admin:delete"),
-    SUPER_ADMIN_READ("management:read"),
-    SUPER_ADMIN_UPDATE("management:update"),
-    SUPER_ADMIN_CREATE("management:create"),
-    SUPER_ADMIN_DELETE("management:delete")
+@Entity
+@Table(name = "permissions")
+@Data
+public class Permission {
 
-    ;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Getter
-    private final String permission;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "deleted_date")
+    private Date deletedDate;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @Column(name = "apis")
+    private String apis;
 }
