@@ -1,15 +1,28 @@
 package com.springboot.core.controllers;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
+
+import com.springboot.core.controllers.dtos.AuthenticationRequest;
+import com.springboot.core.controllers.dtos.AuthenticationResponse;
+import com.springboot.core.models.CommonResponse;
+import com.springboot.core.services.AuthService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/v1/auth")
+@RequiredArgsConstructor
 public class AuthController {
-    @GetMapping("path")
-    public String getString() {
-        return "Hello";
+
+    private final AuthService authService;
+
+    @PostMapping("/login")
+    public ResponseEntity<CommonResponse<AuthenticationResponse>> login(@RequestBody AuthenticationRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 
 }

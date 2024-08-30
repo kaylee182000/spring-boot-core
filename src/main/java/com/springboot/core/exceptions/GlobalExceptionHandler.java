@@ -28,12 +28,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<CommonResponse<?>> handleAuthenticationException(
+    public ResponseEntity<CommonResponse<?>> handleAuthenticationException(AuthenticationException ex,
             WebRequest request) {
         // logger.error("AuthenticationException: {}", ex.getMessage());
         CommonResponse<?> response = CommonResponse.builder()
                 .status(HttpStatus.FORBIDDEN.value())
-                .message("BAD_CREDENTIALS")
+                .message(ex.getMessage())
+                // .message("BAD_CREDENTIALS")
                 .success(false)
                 .build();
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);

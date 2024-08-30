@@ -8,6 +8,8 @@ import com.springboot.core.models.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    boolean existsByUsername(String username);
+    boolean existsByEmail(String Email);
+
+    Optional<User> findByEmail(String Email);
 
 }

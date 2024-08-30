@@ -1,5 +1,6 @@
 package com.springboot.core.models;
 
+import java.util.Collections;
 import java.util.Collection;
 import java.util.Date;
 
@@ -13,47 +14,46 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "users")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String username;
-
-    @Column(nullable = false)
-    private String password;
-
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_date", nullable = false)
+    @Column(name = "createdDate", nullable = false)
     private Date createdDate;
 
-    @Column(name = "created_by")
+    @Column(name = "createdBy")
     private Long createdBy;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_date")
-    private Date updatedDate;
+    @Column(name = "updatedDate")
+    private LocalDate updatedDate;
 
-    @Column(name = "updated_by")
+    @Column(name = "updatedBy")
     private Long updatedBy;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "deleted_date")
+    @Column(name = "deletedDate")
     private Date deletedDate;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "activated_date", nullable = false)
-    private Date activatedDate;
+    @Column(name = "activatedDate")
+    private LocalDate activatedDate;
 
     @Column(name = "email", nullable = false)
     private String email;
@@ -64,19 +64,20 @@ public class User implements UserDetails {
     @Column(name = "phone")
     private String phone;
 
-    @Column(name = "first_name")
+    @Column(name = "firstName")
     private String firstName;
 
-    @Column(name = "last_name")
+    @Column(name = "lastName")
     private String lastName;
 
-    @Column(name = "role_id")
-    private Long roleId;
+    @ManyToOne
+    @JoinColumn(name = "roleId", nullable = false)
+    private Role role;
 
     @Column(name = "avatar")
     private String avatar;
 
-    @Column(name = "middle_name")
+    @Column(name = "middleName")
     private String middleName;
 
     @Enumerated(EnumType.STRING)
@@ -94,16 +95,10 @@ public class User implements UserDetails {
     @Column(name = "status", nullable = false)
     private Status status;
 
-    @Column(name = "publisher_id")
+    @Column(name = "publisherId")
     private Long publisherId;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        // TODO Auto-generated method stub
-        return null; // You will need to implement this method to return the user's authorities
-                     // (roles)
-    }
-
+    // Enums for sex and status
     public enum Sex {
         MALE,
         FEMALE,
@@ -113,5 +108,20 @@ public class User implements UserDetails {
     public enum Status {
         ACTIVE,
         INACTIVE
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public String getPassword() {
+        return hash;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
     }
 }

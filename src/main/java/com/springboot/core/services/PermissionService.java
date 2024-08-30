@@ -1,0 +1,21 @@
+package com.springboot.core.services;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.springboot.core.models.Permission;
+import com.springboot.core.repositories.PermissionRepository;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class PermissionService {
+
+    private final PermissionRepository permissionRepository;
+
+    public List<Permission> getPermissionsByRoleId(Long roleId) {
+        return permissionRepository.findPermissionsByRoleId(roleId);
+    }
+}

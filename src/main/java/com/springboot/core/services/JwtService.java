@@ -13,7 +13,6 @@ import java.util.function.Function;
 import javax.crypto.SecretKey;
 
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -26,9 +25,9 @@ import lombok.RequiredArgsConstructor;
 public class JwtService {
     private static final String SECRET_KEYS = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -47,11 +46,11 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
+        final String email = extractEmail(token);
         if (userDetails == null) {
-            return userRepository.existsByUsername(username) && !isTokenExpired(token);
+            return userRepository.existsByEmail(email) && !isTokenExpired(token);
         }
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        return (email.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
     public String generateToken(UserDetails userDetails) {
