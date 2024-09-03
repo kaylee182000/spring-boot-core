@@ -10,6 +10,7 @@ import com.springboot.core.models.Permission;
 
 public interface PermissionRepository extends JpaRepository<Permission, Long> {
     @Query(value = "SELECT * " +
-            "FROM permissions p JOIN role_permissions rp ON p.id = rp.permissionId WHERE rp.roleId = :roleId", nativeQuery = true)
-    List<Permission> findPermissionsByRoleId(@Param("roleId") Long roleId);
+            "FROM permissions " +
+            "WHERE name = :permissionName", nativeQuery = true)
+    Permission findPermissionsByName(@Param("permissionName") String permissionName);
 }

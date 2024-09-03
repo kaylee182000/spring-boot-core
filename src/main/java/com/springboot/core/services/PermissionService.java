@@ -15,7 +15,7 @@ public class PermissionService {
 
     private final PermissionRepository permissionRepository;
 
-    public List<Permission> getPermissionsByRoleId(Long roleId) {
-        return permissionRepository.findPermissionsByRoleId(roleId);
+    public Permission getPermissionByName(String permissionName) {
+        return permissionRepository.findPermissionsByName(permissionName);
     }
 }

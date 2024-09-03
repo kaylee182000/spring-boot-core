@@ -2,7 +2,10 @@ package com.springboot.core.configs;
 
 import java.io.IOException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,20 +15,29 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.springboot.core.exceptions.ResourceNotFoundException;
 import com.springboot.core.models.Permission;
+import com.springboot.core.models.Role;
 import com.springboot.core.models.User;
 import com.springboot.core.services.JwtService;
 import com.springboot.core.services.PermissionService;
+import com.springboot.core.services.RoleService;
 import com.springboot.core.services.UserService;
 
 import io.jsonwebtoken.lang.Arrays;
+import io.jsonwebtoken.lang.Collections;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 @RequiredArgsConstructor
@@ -36,6 +48,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     private final UserService userService;
+
+    private final RoleService roleService;
 
     private final PermissionService permissionService;
 
@@ -52,58 +66,70 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
         // extract username from JWT token
         email = jwtService.extractEmail(jwt);
-        logger.info("permissions----------------------");
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            logger.info("kien----------------------");
 
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
-            if (jwtService.isTokenValid(jwt, userDetails)) {
-                logger.info("dat----------------------");
+            // UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
+            if (jwtService.isTokenValid(jwt, null)) {
+                Role role = roleService.findRoleCodeName(email).orElseThrow(() -> new ResourceNotFoundException());
+                List<String> listMenuIds = roleService.findMenuByRole(role.getId());
 
-                User user = userService.findByUsername(email);
-                Long roleId = user.getRole().getId();
-
-                List<Permission> permissions = permissionService.getPermissionsByRoleId(roleId);
-                logger.info(permissions);
-                logger.info("sang----------------------");
-
-                // ObjectMapper objectMapper = new ObjectMapper();
-
-                // Set<String> allowedApis = permissions.stream()
-                // .map(Permission::getApis)
-                // .flatMap(apiList -> {
-                // try {
-                // // Parse the JSON array string into a List of Strings
-                // String[] apisArray = objectMapper.readValue(apiList, String[].class);
-                // return Arrays.stream(apisArray);
-                // } catch (Exception e) {
-                // // Handle the exception as needed (e.g., log it)
-                // return Stream.empty();
-                // }
-                // })
-                // .collect(Collectors.toSet());
-
-                // Check if the requested API is allowed
-                String requestApi = extractApiFromRequest(request); // Extract the API from request
                 // Create authentication token and set in context
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
+                        email, null, Collections.emptyList());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-                // if (allowedApis.contains(requestApi)) {
-                // } else {
-                // response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                // "You don't have permission to access this resource.");
-                // return;
-                // }
+                if (!hasPermission(request, role.getCode(), listMenuIds)) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                            "You don't have permission to access this resource.");
+                    return;
+                }
             }
         }
         filterChain.doFilter(request, response);
     }
 
     private String extractApiFromRequest(HttpServletRequest request) {
-        String path = request.getRequestURI().substring(request.getContextPath().length());
-        return path.replaceAll("^/+", ""); // Remove leading slashes
+        String method = request.getMethod().toLowerCase();
+        String path = request.getRequestURI().replaceAll("/v1/", ""); // Assuming "/v1/" prefix
+
+        // Extract the resource path (e.g., "users", "users/2")
+        Pattern pattern = Pattern.compile("^(\\w+)(/\\d+)?$");
+        Matcher matcher = pattern.matcher(path);
+        if (matcher.find()) {
+            String resource = matcher.group(1);
+            String id = matcher.group(2) != null ? "-" + "id" : "";
+            return method + "-" + resource + id;
+        } else {
+            return null;
+        }
+    }
+
+    private boolean hasPermission(HttpServletRequest request, String roleCode, List<String> listMenuIds)
+            throws JsonMappingException, JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<String> transformedListMenus = new ArrayList<>();
+
+        String method = request.getMethod().toUpperCase();
+        if (method.equals("GET")) {
+            method = "VIEW";
+        }
+        for (String listMenu : listMenuIds) {
+            transformedListMenus.add(listMenu + "." + roleCode + "." + method);
+        }
+        // String permissionName = "3.SYSTEM_ADMIN.VIEW";
+        String specificApiName = extractApiFromRequest(request);
+        if (specificApiName != null) {
+            for (String transformedMenu : transformedListMenus) {
+                Permission permission = permissionService.getPermissionByName(transformedMenu);
+                List<String> apis = objectMapper.readValue(permission.getApis(), new TypeReference<List<String>>() {
+                });
+                if (apis.contains(specificApiName)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

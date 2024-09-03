@@ -1,6 +1,6 @@
 package com.springboot.core.models;
 
-import java.util.Collections;
+import io.jsonwebtoken.lang.Collections;
 import java.util.Collection;
 import java.util.Date;
 
