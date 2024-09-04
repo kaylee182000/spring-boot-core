@@ -1,12 +1,13 @@
 package com.springboot.core.models;
 
-import io.jsonwebtoken.lang.Collections;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import io.jsonwebtoken.lang.Collections;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -22,7 +23,6 @@ import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "users")

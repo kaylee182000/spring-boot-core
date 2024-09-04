@@ -12,7 +12,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "role_permissions")
+@Table(name = "roles_permissions")
 @Data
 public class RolePermission {
 

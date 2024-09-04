@@ -1,7 +1,5 @@
 package com.springboot.core.services;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 import com.springboot.core.models.Permission;

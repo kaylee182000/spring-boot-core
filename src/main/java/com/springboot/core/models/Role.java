@@ -57,10 +57,10 @@ public class Role {
     @Column(name = "recoveryConfigId")
     private Long recoveryConfigId;
 
-    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "role")
     private Set<User> users;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "role_permissions", joinColumns = @JoinColumn(name = "roleId"), inverseJoinColumns = @JoinColumn(name = "permissionId"))
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "roles_permissions", joinColumns = @JoinColumn(name = "roleId"), inverseJoinColumns = @JoinColumn(name = "permissionId"))
     private Set<Permission> permissions;
 }

@@ -1,6 +1,7 @@
 package com.springboot.core.services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.springboot.core.models.User;
 import com.springboot.core.repositories.UserRepository;
 
+import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,5 +29,18 @@ public class UserService {
         } else {
             return userRepository.getAllUsers(limit, offset);
         }
+    }
+
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
+
+    public Null deleteUserById(Long id) {
+        userRepository.deleteById(id);
+        return null;
     }
 }

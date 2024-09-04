@@ -15,8 +15,8 @@ import lombok.RequiredArgsConstructor;
 public class RoleService {
     private final RoleRepository roleRepository;
 
-    public Optional<Role> findRoleCodeName(String email) {
-        return roleRepository.findRoleCodeName(email);
+    public Optional<Role> findRoleByEmail(String email) {
+        return roleRepository.findRoleByEmail(email);
     }
 
     public List<String> findMenuByRole(Long roleId) {
