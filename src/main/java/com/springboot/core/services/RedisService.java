@@ -10,72 +10,75 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
-public class RedisService {
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final HashOperations<String, String, Object> hashOperations;
+@RequiredArgsConstructor
+public class RedisService<K, F, V> {
+    private final RedisTemplate<K, V> redisTemplate;
+    private final HashOperations<K, F, V> hashOperations;
 
-    public RedisService(RedisTemplate<String, Object> redisTemplate) {
-        this.redisTemplate = redisTemplate;
-        this.hashOperations = redisTemplate.opsForHash();
-    }
+    // public RedisService(RedisTemplate<K, V> redisTemplate) {
+    // this.redisTemplate = redisTemplate;
+    // this.hashOperations = redisTemplate.opsForHash();
+    // }
 
-    public void set(String key, String value) {
+    public void set(K key, V value) {
         redisTemplate.opsForValue().set(key, value);
     }
 
-    public void setTimeToLive(String key, long timeoutInDays) {
+    public void setTimeToLive(K key, long timeoutInDays) {
         redisTemplate.expire(key, timeoutInDays, TimeUnit.DAYS);
     }
 
-    public void hashSet(String key, String field, Object value) {
+    public void hashSet(K key, F field, V value) {
         hashOperations.put(key, field, value);
     }
 
-    public boolean hashExists(String key, String field) {
+    public boolean hashExists(K key, F field) {
 
         return hashOperations.hasKey(key, field);
     }
 
-    public Object get(String key) {
+    public Object get(K key) {
         return redisTemplate.opsForValue().get(key);
     }
 
-    public Map<String, Object> getField(String key) {
+    public Map<F, V> getField(K key) {
         return hashOperations.entries(key);
     }
 
-    public Object hashGet(String key, String field) {
+    public Object hashGet(K key, F field) {
         return hashOperations.get(key, field);
     }
 
-    public List<Object> hashGetByFieldPrefix(String key, String filedPrefix) {
-        List<Object> objects = new ArrayList<>();
+    // public List<Object> hashGetByFieldPrefix(K key, F filedPrefix) {
+    // List<Object> objects = new ArrayList<>();
 
-        Map<String, Object> hashEntries = hashOperations.entries(key);
+    // Map<F, V> hashEntries = hashOperations.entries(key);
 
-        for (Map.Entry<String, Object> entry : hashEntries.entrySet()) {
-            if (entry.getKey().startsWith(filedPrefix)) {
-                objects.add(entry.getValue());
-            }
-        }
-        return objects;
-    }
+    // for (Map.Entry<F, V> entry : hashEntries.entrySet()) {
+    // if (entry.getKey().startsWith(filedPrefix)) {
+    // objects.add(entry.getValue());
+    // }
+    // }
+    // return objects;
+    // }
 
-    public Set<String> getFieldPrefixes(String key) {
+    public Set<F> getFieldPrefixes(K key) {
         return hashOperations.entries(key).keySet();
     }
 
-    public void delete(String key) {
+    public void delete(K key) {
         redisTemplate.delete(key);
     }
 
-    public void delete(String key, String field) {
+    public void delete(K key, F field) {
         hashOperations.delete(key, field);
     }
 
-    public void delete(String key, List<String> fields) {
-        for (String field : fields) {
+    public void delete(K key, List<F> fields) {
+        for (F field : fields) {
             hashOperations.delete(key, field);
         }
     }

@@ -1,6 +1,7 @@
 package com.springboot.core.services;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -21,5 +22,9 @@ public class RoleService {
 
     public List<String> findMenuByRole(Long roleId) {
         return roleRepository.findMenuByRole(roleId);
+    }
+
+    public Role getRoleWithPermissions(Long roleId) {
+        return roleRepository.findRoleWithPermissions(roleId);
     }
 }

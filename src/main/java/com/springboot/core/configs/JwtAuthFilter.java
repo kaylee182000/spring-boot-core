@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,6 +24,7 @@ import com.springboot.core.models.Permission;
 import com.springboot.core.models.Role;
 import com.springboot.core.services.JwtService;
 import com.springboot.core.services.PermissionService;
+import com.springboot.core.services.RedisService;
 import com.springboot.core.services.RoleService;
 
 import io.jsonwebtoken.lang.Collections;
@@ -35,74 +37,74 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
-
     private final JwtService jwtService;
-
     private final RoleService roleService;
-
     private final PermissionService permissionService;
+    private final RedisService<String, String, Object> redisService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String email;
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
+        String jwt = extractJwtFromRequest(request);
+        String email = null;
+
+        if (jwt != null) {
+            email = jwtService.extractEmail(jwt);
         }
-        jwt = authHeader.substring(7);
-        // extract username from JWT token
-        email = jwtService.extractEmail(jwt);
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-            // UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
             if (jwtService.isTokenValid(jwt, null)) {
-                Role role = this.roleService.findRoleByEmail(email).orElseThrow(() -> new ResourceNotFoundException());
-                List<String> listMenuIds = this.roleService.findMenuByRole(role.getId());
+                Role role = roleService.findRoleByEmail(email).orElseThrow(ResourceNotFoundException::new);
+                List<String> listMenuIds = roleService.findMenuByRole(role.getId());
+
+                // Get data from Redis
+                Object redisData = redisService.get(email);
+                logger.info("No data found in Redis for email: ---------------------- " + redisData);
+
+                // if (redisData instanceof List) {
+                // List<?> dataList = (List<?>) redisData;
+                // for (Object item : dataList) {
+                // if (item instanceof Map) {
+                // Map<?, ?> map = (Map<?, ?>) item;
+                // logger.info(map.toString());
+                // }
+                // }
+                // } else {
+                // logger.info("No data found in Redis for email: " + email);
+                // }
 
                 // Create authentication token and set in context
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         email, null, Collections.emptyList());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+
                 if (!hasPermission(request, role.getCode(), listMenuIds)) {
                     response.setContentType("application/json");
                     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 
                     // Create a JSON object with your desired error message and status
-                    JSONObject errorResponse = new JSONObject();
-                    errorResponse.put("data", null);
-                    errorResponse.put("success", false);
-                    errorResponse.put("message", "You don't have permission to access this resource.");
-                    errorResponse.put("status", HttpServletResponse.SC_FORBIDDEN);
+                    JSONObject json = new JSONObject();
+                    json.put("status", HttpServletResponse.SC_FORBIDDEN);
+                    json.put("message", "You do not have permission to access this resource.");
 
                     PrintWriter out = response.getWriter();
-                    out.print(errorResponse.toString());
+                    out.print(json.toString());
                     out.flush();
                     return;
                 }
             }
         }
+
         filterChain.doFilter(request, response);
     }
 
-    private String extractApiFromRequest(HttpServletRequest request) {
-        String method = request.getMethod().toLowerCase();
-        String path = request.getRequestURI().replaceAll("/v1/", ""); // Assuming "/v1/" prefix
-
-        // Extract the resource path (e.g., "users", "users/2")
-        Pattern pattern = Pattern.compile("^(\\w+)(/\\d+)?$");
-        Matcher matcher = pattern.matcher(path);
-        if (matcher.find()) {
-            String resource = matcher.group(1);
-            String id = matcher.group(2) != null ? "-" + "id" : "";
-            return method + "-" + resource + id;
-        } else {
-            return null;
+    private String extractJwtFromRequest(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
         }
+        return null;
     }
 
     private boolean hasPermission(HttpServletRequest request, String roleCode, List<String> listMenuIds)
@@ -134,7 +136,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String specificApiName = extractApiFromRequest(request);
         if (specificApiName != null) {
             for (String transformedMenu : transformedListMenus) {
-                Permission permission = this.permissionService.getPermissionByName(transformedMenu);
+                Permission permission = permissionService.getPermissionByName(transformedMenu);
                 if (permission != null) {
                     List<String> apis = objectMapper.readValue(permission.getApis(), new TypeReference<List<String>>() {
                     });
@@ -146,5 +148,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         return false;
+    }
+
+    private String extractApiFromRequest(HttpServletRequest request) {
+        String method = request.getMethod().toLowerCase();
+        String path = request.getRequestURI().replaceAll("/v1/", ""); // Assuming "/v1/" prefix
+
+        // Extract the resource path (e.g., "users", "users/2")
+        Pattern pattern = Pattern.compile("^(\\w+)(/\\d+)?$");
+        Matcher matcher = pattern.matcher(path);
+        if (matcher.find()) {
+            String resource = matcher.group(1);
+            String id = matcher.group(2) != null ? "-" + "id" : "";
+            return method + "-" + resource + id;
+        } else {
+            return null;
+        }
     }
 }

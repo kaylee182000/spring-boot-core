@@ -3,6 +3,8 @@ package com.springboot.core.models;
 import java.util.Date;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -35,5 +37,6 @@ public class Permission {
     private String apis;
 
     @ManyToMany(mappedBy = "permissions", fetch = FetchType.EAGER)
+    @JsonBackReference
     private Set<Role> roles;
 }

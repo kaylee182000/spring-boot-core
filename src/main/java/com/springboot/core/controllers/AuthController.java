@@ -1,5 +1,7 @@
 package com.springboot.core.controllers;
 
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +23,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<CommonResponse<AuthenticationResponse>> login(@RequestBody AuthenticationRequest request) {
+    public ResponseEntity<CommonResponse<Map<String, Object>>> login(@RequestBody AuthenticationRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
 
