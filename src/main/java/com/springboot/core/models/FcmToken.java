@@ -1,6 +1,6 @@
 package com.springboot.core.models;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,19 +29,19 @@ public class FcmToken {
     private Long id;
 
     @Column(name = "createdDate", columnDefinition = "datetime(3) default current_timestamp(3)")
-    private LocalDateTime createdDate;
+    private LocalDate createdDate;
 
     @Column(name = "createdBy")
     private Integer createdBy;
 
     @Column(name = "updatedDate", columnDefinition = "datetime(3)")
-    private LocalDateTime updatedDate;
+    private LocalDate updatedDate;
 
     @Column(name = "updatedBy")
     private Integer updatedBy;
 
     @Column(name = "deletedDate", columnDefinition = "datetime(3)")
-    private LocalDateTime deletedDate;
+    private LocalDate deletedDate;
 
     @Column(name = "fcmToken", nullable = false, length = 191)
     private String fcmToken;

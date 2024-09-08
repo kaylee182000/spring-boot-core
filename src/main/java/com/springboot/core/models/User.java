@@ -1,7 +1,8 @@
 package com.springboot.core.models;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Date;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +18,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,23 +35,25 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "createdDate", nullable = false, columnDefinition = "datetime(3) default current_timestamp(3)")
-    private LocalDateTime createdDate;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "createdDate", nullable = false)
+    private Date createdDate;
 
     @Column(name = "createdBy")
     private Integer createdBy;
 
     @Column(name = "updatedDate", columnDefinition = "datetime(3)")
-    private LocalDateTime updatedDate;
+    private Date updatedDate;
 
     @Column(name = "updatedBy")
     private Integer updatedBy;
 
-    @Column(name = "deletedDate", columnDefinition = "datetime(3)")
-    private LocalDateTime deletedDate;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "deletedDate")
+    private Date deletedDate;
 
-    @Column(name = "activatedDate", columnDefinition = "datetime(3) default current_timestamp(3)")
-    private LocalDateTime activatedDate;
+    @Column(name = "activatedDate")
+    private Date activatedDate;
 
     @Column(name = "email", nullable = false, length = 191)
     private String email;
@@ -79,8 +84,9 @@ public class User implements UserDetails {
     @Column(name = "sex", columnDefinition = "enum('MALE','FEMALE','OTHER')")
     private Sex sex;
 
-    @Column(name = "birthday", columnDefinition = "datetime(3)")
-    private LocalDateTime birthday;
+    @Temporal(TemporalType.DATE)
+    @Column(name = "birthday")
+    private Date birthday;
 
     @Column(name = "address", length = 191)
     private String address;

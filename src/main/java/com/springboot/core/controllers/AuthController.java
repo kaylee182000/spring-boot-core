@@ -8,8 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.springboot.core.controllers.dtos.AuthenticationRequest;
-import com.springboot.core.controllers.dtos.AuthenticationResponse;
+import com.springboot.core.dtos.AuthenticationRequest;
 import com.springboot.core.models.CommonResponse;
 import com.springboot.core.services.AuthService;
 

@@ -1,4 +1,4 @@
-package com.springboot.core.controllers.dtos;
+package com.springboot.core.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

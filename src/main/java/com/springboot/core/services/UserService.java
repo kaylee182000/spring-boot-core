@@ -2,10 +2,13 @@ package com.springboot.core.services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.springboot.core.dtos.UserDto;
 import com.springboot.core.models.User;
 import com.springboot.core.repositories.UserRepository;
 
@@ -18,9 +21,10 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public User findByUsername(String email) {
+    public User findByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
     }
 
     public List<User> getAllUsers(int limit, int offset) {

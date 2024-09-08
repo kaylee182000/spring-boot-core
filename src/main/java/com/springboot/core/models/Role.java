@@ -1,6 +1,7 @@
 package com.springboot.core.models;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -16,6 +17,8 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,11 +34,13 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "createdDate", nullable = false, columnDefinition = "datetime(3) default current_timestamp(3)")
-    private LocalDateTime createdDate;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "createdDate", nullable = false)
+    private Date createdDate;
 
-    @Column(name = "updatedDate", columnDefinition = "datetime(3) default current_timestamp(3)")
-    private LocalDateTime updatedDate;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "updatedDate")
+    private Date updatedDate;
 
     @Column(name = "createdBy")
     private Integer createdBy;
@@ -43,8 +48,9 @@ public class Role {
     @Column(name = "updatedBy")
     private Integer updatedBy;
 
-    @Column(name = "deletedDate", columnDefinition = "datetime(3)")
-    private LocalDateTime deletedDate;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "deletedDate")
+    private Date deletedDate;
 
     @Column(name = "name", nullable = false, length = 191)
     private String name;

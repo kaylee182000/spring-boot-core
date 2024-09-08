@@ -1,4 +1,4 @@
-package com.springboot.core.controllers.dtos;
+package com.springboot.core.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

@@ -1,6 +1,7 @@
 package com.springboot.core.models;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -12,20 +13,32 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.SqlResultSetMapping;
+import jakarta.persistence.ConstructorResult;
+import jakarta.persistence.EntityResult;
+import jakarta.persistence.FieldResult;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.Data;
 
 @Entity
 @Table(name = "permissions")
 @Data
+@SqlResultSetMapping(name = "PermissionMapping", entities = @EntityResult(entityClass = Permission.class, fields = {
+        @FieldResult(name = "id", column = "id"),
+        @FieldResult(name = "deletedDate", column = "deletedDate"),
+        @FieldResult(name = "name", column = "name"),
+        @FieldResult(name = "apis", column = "apis")
+}))
 public class Permission {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "deletedDate", columnDefinition = "datetime(3)")
-    private LocalDateTime deletedDate;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "deletedDate")
+    private Date deletedDate;
 
     @Column(name = "name", nullable = false, length = 191, unique = true)
     private String name;

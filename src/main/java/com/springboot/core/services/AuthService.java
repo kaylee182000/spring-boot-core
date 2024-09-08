@@ -1,6 +1,6 @@
 package com.springboot.core.services;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,9 +13,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
-import com.springboot.core.controllers.dtos.AuthenticationRequest;
-import com.springboot.core.controllers.dtos.AuthenticationResponse;
+import com.springboot.core.dtos.AuthenticationRequest;
+import com.springboot.core.dtos.UserDto;
 import com.springboot.core.exceptions.ResourceNotFoundException;
+import com.springboot.core.mappers.UserMapper;
 import com.springboot.core.models.CommonResponse;
 import com.springboot.core.models.FcmToken;
 import com.springboot.core.models.Permission;
@@ -49,37 +50,41 @@ public class AuthService {
                 var jwtToken = jwtService.generateToken(user);
                 var refreshToken = jwtService.generateRefreshToken(user);
                 saveUserToken(user, jwtToken);
+
+                UserDto userDto = UserMapper.INSTANCE.userToUserDto(user);
+
                 Map<String, Object> response = new HashMap<String, Object>();
                 response.put("accessToken", jwtToken);
                 response.put("refreshToken", refreshToken);
-                response.put("user", user);
+                response.put("user", userDto);
 
                 // store user to redis
                 // Get the role and role permissions
-                Role role = user.getRole();
-                Set<Permission> rolePermissions = roleRepository.findPermissionByRoleId(role.getId());
-                // Create a map to store the role and role permissions data
-                Map<String, Object> roleData = new HashMap<>();
-                roleData.put("id", role.getId());
-                roleData.put("name", role.getName());
-                roleData.put("code", role.getCode());
+                // Role role = user.getRole();
+                // List<Permission> rolePermissions =
+                // roleRepository.findPermissionByRoleId(role.getId());
+                // // Create a map to store the role and role permissions data
+                // Map<String, Object> roleData = new HashMap<>();
+                // roleData.put("id", role.getId());
+                // roleData.put("name", role.getName());
+                // roleData.put("code", role.getCode());
 
-                // Create a list to store the role permissions data
-                List<Map<String, Object>> permissionData = new ArrayList<>();
-                for (Permission permission : rolePermissions) {
-                        Map<String, Object> permissionMap = new HashMap<>();
-                        permissionMap.put("id", permission.getId());
-                        permissionMap.put("deletedDate", permission.getDeletedDate());
-                        permissionMap.put("name", permission.getName());
-                        permissionMap.put("apis", permission.getApis());
-                        permissionData.add(permissionMap);
-                }
+                // // Create a list to store the role permissions data
+                // List<Map<String, Object>> permissionData = new ArrayList<>();
+                // for (Permission permission : rolePermissions) {
+                // Map<String, Object> permissionMap = new HashMap<>();
+                // permissionMap.put("id", permission.getId());
+                // permissionMap.put("deletedDate", permission.getDeletedDate());
+                // permissionMap.put("name", permission.getName());
+                // permissionMap.put("apis", permission.getApis());
+                // permissionData.add(permissionMap);
+                // }
 
-                // Add the role permissions data to the role data map
-                roleData.put("rolePermissions", permissionData);
+                // // Add the role permissions data to the role data map
+                // roleData.put("rolePermissions", permissionData);
 
                 // Store the role data in Redis
-                redisService.set(user.getEmail(), roleData);
+                redisService.set(user.getEmail(), userDto);
 
                 return CommonResponse.<Map<String, Object>>builder().status(HttpStatus.OK.value())
                                 .message("LOGIN_SUCCESS").success(true)
@@ -91,7 +96,7 @@ public class AuthService {
                 var token = FcmToken.builder()
                                 .user(user)
                                 .fcmToken(jwtToken)
-                                .createdDate(LocalDateTime.now())
+                                .createdDate(LocalDate.now())
                                 .createdBy(user.getId().intValue()).updatedDate(null)
                                 .updatedBy(null)
                                 .deviceName("test")
