@@ -1,6 +1,6 @@
 package com.springboot.core.models;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -16,8 +16,6 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,36 +26,34 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Role {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "createdDate", nullable = false)
-    private Date createdDate;
+    @Column(name = "createdDate", nullable = false, columnDefinition = "datetime(3) default current_timestamp(3)")
+    private LocalDateTime createdDate;
+
+    @Column(name = "updatedDate", columnDefinition = "datetime(3) default current_timestamp(3)")
+    private LocalDateTime updatedDate;
 
     @Column(name = "createdBy")
-    private Long createdBy;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updatedDate")
-    private Date updatedDate;
+    private Integer createdBy;
 
     @Column(name = "updatedBy")
-    private Long updatedBy;
+    private Integer updatedBy;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "deletedDate")
-    private Date deletedDate;
+    @Column(name = "deletedDate", columnDefinition = "datetime(3)")
+    private LocalDateTime deletedDate;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = 191)
     private String name;
 
-    @Column(name = "code", nullable = false)
+    @Column(name = "code", nullable = false, length = 191)
     private String code;
 
     @Column(name = "recoveryConfigId")
-    private Long recoveryConfigId;
+    private Integer recoveryConfigId;
 
     @OneToMany(mappedBy = "role")
     private Set<User> users;

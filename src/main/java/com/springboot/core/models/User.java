@@ -1,8 +1,7 @@
 package com.springboot.core.models;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,8 +17,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,68 +32,65 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "createdDate", nullable = false)
-    private Date createdDate;
+    @Column(name = "createdDate", nullable = false, columnDefinition = "datetime(3) default current_timestamp(3)")
+    private LocalDateTime createdDate;
 
     @Column(name = "createdBy")
-    private Long createdBy;
+    private Integer createdBy;
 
-    @Column(name = "updatedDate")
-    private LocalDate updatedDate;
+    @Column(name = "updatedDate", columnDefinition = "datetime(3)")
+    private LocalDateTime updatedDate;
 
     @Column(name = "updatedBy")
-    private Long updatedBy;
+    private Integer updatedBy;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "deletedDate")
-    private Date deletedDate;
+    @Column(name = "deletedDate", columnDefinition = "datetime(3)")
+    private LocalDateTime deletedDate;
 
-    @Column(name = "activatedDate")
-    private LocalDate activatedDate;
+    @Column(name = "activatedDate", columnDefinition = "datetime(3) default current_timestamp(3)")
+    private LocalDateTime activatedDate;
 
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", nullable = false, length = 191)
     private String email;
 
-    @Column(name = "hash")
+    @Column(name = "hash", length = 191)
     private String hash;
 
-    @Column(name = "phone")
+    @Column(name = "phone", length = 191)
     private String phone;
 
-    @Column(name = "firstName")
+    @Column(name = "firstName", length = 191)
     private String firstName;
 
-    @Column(name = "lastName")
+    @Column(name = "lastName", length = 191)
     private String lastName;
 
     @ManyToOne
-    @JoinColumn(name = "roleId", nullable = false)
+    @JoinColumn(name = "roleId")
     private Role role;
 
-    @Column(name = "avatar")
+    @Column(name = "avatar", length = 191)
     private String avatar;
 
-    @Column(name = "middleName")
+    @Column(name = "middleName", length = 191)
     private String middleName;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "sex")
+    @Column(name = "sex", columnDefinition = "enum('MALE','FEMALE','OTHER')")
     private Sex sex;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "birthday")
-    private Date birthday;
+    @Column(name = "birthday", columnDefinition = "datetime(3)")
+    private LocalDateTime birthday;
 
-    @Column(name = "address")
+    @Column(name = "address", length = 191)
     private String address;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, columnDefinition = "enum('ACTIVE','INACTIVE') default 'ACTIVE'")
     private Status status;
 
     @Column(name = "publisherId")
-    private Long publisherId;
+    private Integer publisherId;
 
     // Enums for sex and status
     public enum Sex {

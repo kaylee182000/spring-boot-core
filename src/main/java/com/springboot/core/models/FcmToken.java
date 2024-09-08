@@ -1,56 +1,58 @@
 package com.springboot.core.models;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-
-import java.util.Date;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.Builder;
-import java.time.LocalDateTime;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Entity
 @Table(name = "fcm_tokens")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class FcmToken {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "createdDate")
+    @Column(name = "createdDate", columnDefinition = "datetime(3) default current_timestamp(3)")
     private LocalDateTime createdDate;
 
     @Column(name = "createdBy")
-    private Long createdBy;
+    private Integer createdBy;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updatedDate")
-    private Date updatedDate;
+    @Column(name = "updatedDate", columnDefinition = "datetime(3)")
+    private LocalDateTime updatedDate;
 
     @Column(name = "updatedBy")
-    private Long updatedBy;
+    private Integer updatedBy;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "deletedDate")
-    private Date deletedDate;
+    @Column(name = "deletedDate", columnDefinition = "datetime(3)")
+    private LocalDateTime deletedDate;
 
-    @Column(name = "fcmToken")
+    @Column(name = "fcmToken", nullable = false, length = 191)
     private String fcmToken;
 
-    @Column(name = "deviceName")
+    @Column(name = "deviceName", nullable = false, length = 191)
     private String deviceName;
 
-    @Column(name = "deviceHash")
+    @Column(name = "deviceHash", nullable = false, length = 191)
     private String deviceHash;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "userId", nullable = false)
     private User user;
 }

@@ -1,6 +1,6 @@
 package com.springboot.core.models;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -13,8 +13,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.Data;
 
 @Entity
@@ -26,14 +24,13 @@ public class Permission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "deletedDate")
-    private Date deletedDate;
+    @Column(name = "deletedDate", columnDefinition = "datetime(3)")
+    private LocalDateTime deletedDate;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = 191, unique = true)
     private String name;
 
-    @Column(name = "apis", nullable = false)
+    @Column(name = "apis", columnDefinition = "json")
     private String apis;
 
     @ManyToMany(mappedBy = "permissions", fetch = FetchType.EAGER)

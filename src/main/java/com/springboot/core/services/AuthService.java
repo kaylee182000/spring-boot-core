@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.springframework.http.HttpStatus;
@@ -53,9 +55,31 @@ public class AuthService {
                 response.put("user", user);
 
                 // store user to redis
-                List<Map<String, Object>> permission = roleRepository
-                                .findPermissionByRoleId(user.getRole().getId());
-                redisService.set(user.getEmail(), user.getFirstName());
+                // Get the role and role permissions
+                Role role = user.getRole();
+                Set<Permission> rolePermissions = roleRepository.findPermissionByRoleId(role.getId());
+                // Create a map to store the role and role permissions data
+                Map<String, Object> roleData = new HashMap<>();
+                roleData.put("id", role.getId());
+                roleData.put("name", role.getName());
+                roleData.put("code", role.getCode());
+
+                // Create a list to store the role permissions data
+                List<Map<String, Object>> permissionData = new ArrayList<>();
+                for (Permission permission : rolePermissions) {
+                        Map<String, Object> permissionMap = new HashMap<>();
+                        permissionMap.put("id", permission.getId());
+                        permissionMap.put("deletedDate", permission.getDeletedDate());
+                        permissionMap.put("name", permission.getName());
+                        permissionMap.put("apis", permission.getApis());
+                        permissionData.add(permissionMap);
+                }
+
+                // Add the role permissions data to the role data map
+                roleData.put("rolePermissions", permissionData);
+
+                // Store the role data in Redis
+                redisService.set(user.getEmail(), roleData);
 
                 return CommonResponse.<Map<String, Object>>builder().status(HttpStatus.OK.value())
                                 .message("LOGIN_SUCCESS").success(true)
@@ -67,7 +91,8 @@ public class AuthService {
                 var token = FcmToken.builder()
                                 .user(user)
                                 .fcmToken(jwtToken)
-                                .createdDate(LocalDateTime.now()).createdBy(user.getId()).updatedDate(null)
+                                .createdDate(LocalDateTime.now())
+                                .createdBy(user.getId().intValue()).updatedDate(null)
                                 .updatedBy(null)
                                 .deviceName("test")
                                 .deviceHash("test").updatedBy(null)
