@@ -12,17 +12,11 @@ import com.springboot.core.models.Role;
 
 public interface RoleRepository extends JpaRepository<Role, Long> {
 
-        @Query(value = "SELECT p.* " +
-                        "FROM roles r " +
-                        "LEFT JOIN roles_permissions rp ON r.id = rp.roleId " +
-                        "LEFT JOIN permissions p ON p.id = rp.permissionId " +
-                        "WHERE r.id = :roleId", nativeQuery = true)
-        List<Permission> findPermissionByRoleId(@Param("roleId") Long roleId);
-
-        @Query(value = "SELECT r FROM " +
-                        " Role r JOIN FETCH r.permissions " +
-                        " WHERE r.id = :roleId")
+        @Query("SELECT r FROM Role r JOIN FETCH r.permissions WHERE r.id = :roleId")
         Role findRoleWithPermissions(@Param("roleId") Long roleId);
+
+        @Query("SELECT p FROM Permission p JOIN p.roles r WHERE r.id = :roleId")
+        List<Permission> findPermissionByRoleId(@Param("roleId") Long roleId);
 
         @Query(value = "SELECT mr.menuId " +
                         "FROM menu_roles mr " +

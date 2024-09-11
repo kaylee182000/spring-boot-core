@@ -138,9 +138,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             for (String transformedMenu : transformedListMenus) {
                 Permission permission = permissionService.getPermissionByName(transformedMenu);
                 if (permission != null) {
-                    List<String> apis = objectMapper.readValue(permission.getApis(), new TypeReference<List<String>>() {
-                    });
-                    if (apis.contains(specificApiName)) {
+                    // List<String> apis = objectMapper.readValue(permission.getApis(), new
+                    // TypeReference<List<String>>() {
+                    // });
+                    if (permission.getApis().contains(specificApiName)) {
                         return true;
                     }
                 }

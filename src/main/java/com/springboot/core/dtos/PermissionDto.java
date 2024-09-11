@@ -2,6 +2,9 @@ package com.springboot.core.dtos;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

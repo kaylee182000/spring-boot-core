@@ -8,14 +8,20 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.springboot.core.dtos.AuthenticationRequest;
+import com.springboot.core.dtos.PermissionDto;
+import com.springboot.core.dtos.RoleDto;
 import com.springboot.core.dtos.UserDto;
 import com.springboot.core.exceptions.ResourceNotFoundException;
+import com.springboot.core.mappers.PermissionMapper;
+import com.springboot.core.mappers.RoleMapper;
 import com.springboot.core.mappers.UserMapper;
 import com.springboot.core.models.CommonResponse;
 import com.springboot.core.models.FcmToken;
@@ -41,6 +47,8 @@ public class AuthService {
         private final RoleRepository roleRepository;
 
         public CommonResponse<Map<String, Object>> login(AuthenticationRequest request) {
+                ObjectMapper objectMapper = new ObjectMapper();
+
                 authenticationManager.authenticate(
                                 new UsernamePasswordAuthenticationToken(
                                                 request.getEmail(),
@@ -51,40 +59,36 @@ public class AuthService {
                 var refreshToken = jwtService.generateRefreshToken(user);
                 saveUserToken(user, jwtToken);
 
+                Role role = roleRepository.findRoleWithPermissions(user.getRole().getId());
+                RoleDto roleDto = RoleMapper.INSTANCE.roleToRoleDto(role);
+
+                List<Permission> permissions = roleRepository.findPermissionByRoleId(role.getId());
+                List<PermissionDto> listPermissionDto = new ArrayList<>();
+                for (Permission permission : permissions) {
+                        PermissionDto permissionDto = PermissionMapper.INSTANCE.permissionToPermissionDto(permission);
+                        listPermissionDto.add(permissionDto);
+                }
+                roleDto.setRolePermissions(listPermissionDto);
+
                 UserDto userDto = UserMapper.INSTANCE.userToUserDto(user);
+                userDto.setRole(roleDto);
 
                 Map<String, Object> response = new HashMap<String, Object>();
                 response.put("accessToken", jwtToken);
                 response.put("refreshToken", refreshToken);
                 response.put("user", userDto);
-
-                // store user to redis
-                // Get the role and role permissions
-                // Role role = user.getRole();
-                // List<Permission> rolePermissions =
-                // roleRepository.findPermissionByRoleId(role.getId());
-                // // Create a map to store the role and role permissions data
-                // Map<String, Object> roleData = new HashMap<>();
-                // roleData.put("id", role.getId());
-                // roleData.put("name", role.getName());
-                // roleData.put("code", role.getCode());
-
-                // // Create a list to store the role permissions data
-                // List<Map<String, Object>> permissionData = new ArrayList<>();
-                // for (Permission permission : rolePermissions) {
-                // Map<String, Object> permissionMap = new HashMap<>();
-                // permissionMap.put("id", permission.getId());
-                // permissionMap.put("deletedDate", permission.getDeletedDate());
-                // permissionMap.put("name", permission.getName());
-                // permissionMap.put("apis", permission.getApis());
-                // permissionData.add(permissionMap);
-                // }
-
-                // // Add the role permissions data to the role data map
-                // roleData.put("rolePermissions", permissionData);
-
+                System.out.println(userDto);
                 // Store the role data in Redis
-                redisService.set(user.getEmail(), userDto);
+                try {
+                        String userJson = objectMapper.writeValueAsString(userDto);
+                        System.out.println(userJson);
+
+                        redisService.set(user.getId().toString(), userJson);
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        // Handle the exception appropriately
+                }
+                // redisService.set(user.getEmail(), userDto);
 
                 return CommonResponse.<Map<String, Object>>builder().status(HttpStatus.OK.value())
                                 .message("LOGIN_SUCCESS").success(true)
