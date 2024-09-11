@@ -19,5 +19,5 @@ public class PermissionDto {
     private Long id;
     private LocalDate deletedDate;
     private String name;
-    private List<String> apis;
+    // private String apis;
 }

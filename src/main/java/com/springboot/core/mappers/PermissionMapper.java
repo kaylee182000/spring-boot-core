@@ -16,15 +16,5 @@ import com.springboot.core.models.Permission;
 public interface PermissionMapper {
     PermissionMapper INSTANCE = Mappers.getMapper(PermissionMapper.class);
 
-    @Mapping(target = "apis", qualifiedByName = "mapApis")
     PermissionDto permissionToPermissionDto(Permission permission);
-
-    @Named("mapApis")
-    default List<String> mapApis(List<JsonNode> apis) {
-        // Implement the logic to map List<JsonNode> to List<String>
-        // For example:
-        return apis.stream()
-                .map(JsonNode::asText)
-                .collect(Collectors.toList());
-    }
 }

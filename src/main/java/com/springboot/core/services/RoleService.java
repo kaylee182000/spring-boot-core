@@ -36,20 +36,6 @@ public class RoleService {
     }
 
     public List<Permission> findPermissionByRoleId(Long roleId) {
-        List<Permission> list = roleRepository.findPermissionByRoleId(roleId);
-        for (Permission permission : list) {
-            permission.setApis(
-                    permission.getApis().stream().map(jsonNode -> {
-                        try {
-                            return objectMapper.treeToValue(jsonNode, JsonNode.class);
-                        } catch (JsonProcessingException e) {
-                            // Handle the exception here, e.g. log the error or throw a custom exception
-                            // You can also return a default value or null if appropriate
-                            return null;
-                        }
-                    })
-                            .collect(Collectors.toList()));
-        }
-        return list;
+        return roleRepository.findPermissionByRoleId(roleId);
     }
 }
