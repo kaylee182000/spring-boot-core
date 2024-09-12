@@ -1,14 +1,11 @@
 package com.springboot.core.services;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.logging.Logger;
 
-import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,7 +26,6 @@ import com.springboot.core.models.Permission;
 import com.springboot.core.models.Role;
 import com.springboot.core.models.User;
 import com.springboot.core.repositories.FcmTokenRepository;
-import com.springboot.core.repositories.PermissionRepository;
 import com.springboot.core.repositories.RoleRepository;
 import com.springboot.core.repositories.UserRepository;
 
@@ -66,7 +62,9 @@ public class AuthService {
                 List<PermissionDto> listPermissionDto = new ArrayList<>();
                 for (Permission permission : permissions) {
                         PermissionDto permissionDto = PermissionMapper.INSTANCE.permissionToPermissionDto(permission);
+
                         listPermissionDto.add(permissionDto);
+
                 }
                 roleDto.setRolePermissions(listPermissionDto);
 
@@ -77,7 +75,6 @@ public class AuthService {
                 response.put("accessToken", jwtToken);
                 response.put("refreshToken", refreshToken);
                 response.put("user", userDto);
-                System.out.println(userDto);
                 // Store the role data in Redis
                 try {
                         String userJson = objectMapper.writeValueAsString(userDto);
