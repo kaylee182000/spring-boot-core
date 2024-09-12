@@ -1,5 +1,6 @@
 package com.springboot.core.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -14,9 +15,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.springboot.core.dtos.PermissionDto;
+import com.springboot.core.dtos.RoleDto;
+import com.springboot.core.dtos.UserDto;
 import com.springboot.core.exceptions.ResourceNotFoundException;
+import com.springboot.core.mappers.PermissionMapper;
+import com.springboot.core.mappers.RoleMapper;
+import com.springboot.core.mappers.UserMapper;
+import com.springboot.core.mappers.UserMapperImpl;
 import com.springboot.core.models.CommonResponse;
+import com.springboot.core.models.Permission;
+import com.springboot.core.models.Role;
 import com.springboot.core.models.User;
+import com.springboot.core.services.RoleService;
 import com.springboot.core.services.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -26,57 +37,69 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+        private final UserService userService;
 
-    @GetMapping("/users")
-    public ResponseEntity<CommonResponse<List<User>>> getUsers(
-            @RequestParam(required = false, defaultValue = "10") int limit,
-            @RequestParam(defaultValue = "1") int page) {
-        String message = "Successfully!";
-        HttpStatus statusCode = HttpStatus.OK;
-        int offset = (page - 1) * limit;
-        List<User> users = userService.getAllUsers(limit, offset);
-        return ResponseEntity.status(statusCode).body(CommonResponse.<List<User>>builder().status(statusCode.value())
-                .message(message).success(true).data(users).build());
-    }
+        private final RoleService roleService;
 
-    @GetMapping("/users/{user_id}")
-    public ResponseEntity<CommonResponse<User>> getUserById(
-            @PathVariable String user_id) {
-        String message = "Successfully!";
-        HttpStatus statusCode = HttpStatus.OK;
-        User user = userService.getUserById(Long.parseLong(user_id)).orElseThrow(() -> new ResourceNotFoundException());
-        return ResponseEntity.status(statusCode).body(CommonResponse.<User>builder().status(statusCode.value())
-                .message(message).success(true).data(user).build());
-    }
+        private final UserMapperImpl userMapperImpl;
 
-    @PostMapping("/users")
-    public ResponseEntity<CommonResponse<User>> createUser(
-            @RequestBody User reqBody) {
-        String message = "Successfully!";
-        HttpStatus statusCode = HttpStatus.OK;
-        userService.saveUser(reqBody);
-        return ResponseEntity.status(statusCode).body(CommonResponse.<User>builder().status(statusCode.value())
-                .message(message).success(true).data(reqBody).build());
-    }
+        @GetMapping("/users")
+        public ResponseEntity<CommonResponse<List<UserDto>>> getUsers(
+                        @RequestParam(required = false, defaultValue = "10") int limit,
+                        @RequestParam(defaultValue = "1") int page) {
+                String message = "Successfully!";
+                HttpStatus statusCode = HttpStatus.OK;
+                int offset = (page - 1) * limit;
+                List<User> users = userService.getAllUsers(limit, offset);
+                List<UserDto> listUserDtos = new ArrayList<UserDto>();
+                for (User user : users) {
+                        UserDto userDto = userMapperImpl.userToUserDto(user);
+                        listUserDtos.add(userDto);
+                }
+                return ResponseEntity.status(statusCode)
+                                .body(CommonResponse.<List<UserDto>>builder().status(statusCode.value())
+                                                .message(message).success(true).data(listUserDtos).build());
+        }
 
-    @PatchMapping("/user/{user_id}")
-    public ResponseEntity<CommonResponse<User>> updateUserById(
-            @PathVariable String user_id, @RequestBody User reqBody) {
-        String message = "Successfully!";
-        HttpStatus statusCode = HttpStatus.OK;
-        userService.saveUser(reqBody);
-        return ResponseEntity.status(statusCode).body(CommonResponse.<User>builder().status(statusCode.value())
-                .message(message).success(true).data(reqBody).build());
-    }
+        @GetMapping("/users/{user_id}")
+        public ResponseEntity<CommonResponse<User>> getUserById(
+                        @PathVariable String user_id) {
+                String message = "Successfully!";
+                HttpStatus statusCode = HttpStatus.OK;
+                User user = userService.getUserById(Long.parseLong(user_id))
+                                .orElseThrow(() -> new ResourceNotFoundException());
+                return ResponseEntity.status(statusCode).body(CommonResponse.<User>builder().status(statusCode.value())
+                                .message(message).success(true).data(user).build());
+        }
 
-    @DeleteMapping("/user/{user_id}")
-    public ResponseEntity<CommonResponse<?>> deleteUserById(
-            @PathVariable String user_id) {
-        String message = "Successfully!";
-        HttpStatus statusCode = HttpStatus.OK;
-        return ResponseEntity.status(statusCode).body(CommonResponse.builder().status(statusCode.value())
-                .message(message).success(true).data(userService.deleteUserById(Long.parseLong(user_id))).build());
-    }
+        @PostMapping("/users")
+        public ResponseEntity<CommonResponse<User>> createUser(
+                        @RequestBody User reqBody) {
+                String message = "Successfully!";
+                HttpStatus statusCode = HttpStatus.OK;
+                userService.saveUser(reqBody);
+                return ResponseEntity.status(statusCode).body(CommonResponse.<User>builder().status(statusCode.value())
+                                .message(message).success(true).data(reqBody).build());
+        }
+
+        @PatchMapping("/user/{user_id}")
+        public ResponseEntity<CommonResponse<User>> updateUserById(
+                        @PathVariable String user_id, @RequestBody User reqBody) {
+                String message = "Successfully!";
+                HttpStatus statusCode = HttpStatus.OK;
+                userService.saveUser(reqBody);
+                return ResponseEntity.status(statusCode).body(CommonResponse.<User>builder().status(statusCode.value())
+                                .message(message).success(true).data(reqBody).build());
+        }
+
+        @DeleteMapping("/user/{user_id}")
+        public ResponseEntity<CommonResponse<?>> deleteUserById(
+                        @PathVariable String user_id) {
+                String message = "Successfully!";
+                HttpStatus statusCode = HttpStatus.OK;
+                return ResponseEntity.status(statusCode).body(CommonResponse.builder().status(statusCode.value())
+                                .message(message).success(true)
+                                .data(userService.deleteUserById(Long.parseLong(user_id))).build());
+        }
 
 }

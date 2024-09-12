@@ -1,12 +1,17 @@
 package com.springboot.core.models;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
+
+import org.hibernate.annotations.Type;
+
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityResult;
@@ -43,8 +48,9 @@ public class Permission {
     @Column(name = "name", nullable = false, length = 191, unique = true)
     private String name;
 
-    @Column(name = "apis", columnDefinition = "json")
-    private String apis;
+    @Type(JsonType.class)
+    @Column(name = "apis", columnDefinition = "jsonb")
+    private List<String> apis = new ArrayList<String>();
 
     @ManyToMany(mappedBy = "permissions", fetch = FetchType.EAGER)
     @JsonBackReference
