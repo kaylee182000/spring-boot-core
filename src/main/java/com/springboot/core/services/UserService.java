@@ -31,6 +31,7 @@ public class UserService {
         if (limit == -1) {
             return userRepository.findAll();
         } else {
+            System.out.println("UserService: " + userRepository.getAllUsers(limit, offset));
             return userRepository.getAllUsers(limit, offset);
         }
     }

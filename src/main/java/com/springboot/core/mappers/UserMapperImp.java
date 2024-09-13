@@ -23,9 +23,12 @@ public class UserMapperImp implements UserMapper {
 
     @Override
     public UserDto userToUserDto(User user) {
-        Role role = roleService.findRoleWithPermissions(user.getRole().getId());
+        Role role = user.getRole();
+        if (role == null) {
+            UserDto userDto = UserMapper.INSTANCE.userToUserDto(user);
+            return userDto;
+        }
         RoleDto roleDto = RoleMapper.INSTANCE.roleToRoleDto(role);
-
         List<Permission> permissions = roleService.findPermissionByRoleId(role.getId());
         List<PermissionDto> listPermissionDto = new ArrayList<>();
         for (Permission permission : permissions) {

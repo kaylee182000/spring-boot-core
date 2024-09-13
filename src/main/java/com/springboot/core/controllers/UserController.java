@@ -15,17 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.springboot.core.dtos.PermissionDto;
-import com.springboot.core.dtos.RoleDto;
 import com.springboot.core.dtos.UserDto;
 import com.springboot.core.exceptions.ResourceNotFoundException;
-import com.springboot.core.mappers.PermissionMapper;
-import com.springboot.core.mappers.RoleMapper;
-import com.springboot.core.mappers.UserMapper;
-import com.springboot.core.mappers.UserMapperImpl;
+import com.springboot.core.mappers.UserMapperImp;
 import com.springboot.core.models.CommonResponse;
-import com.springboot.core.models.Permission;
-import com.springboot.core.models.Role;
 import com.springboot.core.models.User;
 import com.springboot.core.services.RoleService;
 import com.springboot.core.services.UserService;
@@ -41,7 +34,7 @@ public class UserController {
 
         private final RoleService roleService;
 
-        private final UserMapperImpl userMapperImpl;
+        private final UserMapperImp userMapperImp;
 
         @GetMapping("/users")
         public ResponseEntity<CommonResponse<List<UserDto>>> getUsers(
@@ -49,11 +42,11 @@ public class UserController {
                         @RequestParam(defaultValue = "1") int page) {
                 String message = "Successfully!";
                 HttpStatus statusCode = HttpStatus.OK;
-                int offset = (page - 1) * limit;
+                int offset = page * limit;
                 List<User> users = userService.getAllUsers(limit, offset);
                 List<UserDto> listUserDtos = new ArrayList<UserDto>();
                 for (User user : users) {
-                        UserDto userDto = userMapperImpl.userToUserDto(user);
+                        UserDto userDto = userMapperImp.userToUserDto(user);
                         listUserDtos.add(userDto);
                 }
                 return ResponseEntity.status(statusCode)
@@ -62,14 +55,16 @@ public class UserController {
         }
 
         @GetMapping("/users/{user_id}")
-        public ResponseEntity<CommonResponse<User>> getUserById(
+        public ResponseEntity<CommonResponse<UserDto>> getUserById(
                         @PathVariable String user_id) {
                 String message = "Successfully!";
                 HttpStatus statusCode = HttpStatus.OK;
                 User user = userService.getUserById(Long.parseLong(user_id))
                                 .orElseThrow(() -> new ResourceNotFoundException());
-                return ResponseEntity.status(statusCode).body(CommonResponse.<User>builder().status(statusCode.value())
-                                .message(message).success(true).data(user).build());
+                UserDto userDto = userMapperImp.userToUserDto(user);
+                return ResponseEntity.status(statusCode)
+                                .body(CommonResponse.<UserDto>builder().status(statusCode.value())
+                                                .message(message).success(true).data(userDto).build());
         }
 
         @PostMapping("/users")

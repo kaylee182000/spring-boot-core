@@ -17,7 +17,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
         Optional<User> findByEmail(String Email);
 
-        @Query(value = "SELECT * FROM users " +
+        @Query(value = "SELECT users.* " +
+                        "FROM users " +
+                        // "JOIN roles ON users.roleId = roles.id " +
                         "LIMIT :limit OFFSET :offset", nativeQuery = true)
         public List<User> getAllUsers(@Param("limit") int limit, @Param("offset") int offset);
 }

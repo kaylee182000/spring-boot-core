@@ -51,24 +51,6 @@ public class AuthService {
                 var jwtToken = jwtService.generateToken(user);
                 var refreshToken = jwtService.generateRefreshToken(user);
                 saveUserToken(user, jwtToken);
-
-                // Role role = roleService.findRoleWithPermissions(user.getRole().getId());
-                // RoleDto roleDto = RoleMapper.INSTANCE.roleToRoleDto(role);
-
-                // List<Permission> permissions =
-                // roleService.findPermissionByRoleId(role.getId());
-                // List<PermissionDto> listPermissionDto = new ArrayList<>();
-                // for (Permission permission : permissions) {
-                // PermissionDto permissionDto =
-                // PermissionMapper.INSTANCE.permissionToPermissionDto(permission);
-
-                // listPermissionDto.add(permissionDto);
-
-                // }
-                // roleDto.setRolePermissions(listPermissionDto);
-
-                // UserDto userDto = UserMapper.INSTANCE.userToUserDto(user);
-                // userDto.setRole(roleDto);
                 UserDto userDto = mapperImp.userToUserDto(user);
                 Map<String, Object> response = new HashMap<String, Object>();
                 response.put("accessToken", jwtToken);
@@ -77,8 +59,6 @@ public class AuthService {
                 // Store the role data in Redis
                 try {
                         String userJson = objectMapper.writeValueAsString(userDto);
-                        System.out.println(userJson);
-
                         redisService.set(user.getEmail(), userJson);
                 } catch (Exception e) {
                         e.printStackTrace();
