@@ -66,12 +66,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 if (!hasPermission(request, email)) {
                     response.setContentType("application/json");
-                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setStatus(HttpServletResponse.SC_OK);
 
                     // Create a JSON object with your desired error message and status
                     JSONObject json = new JSONObject();
                     json.put("status", HttpServletResponse.SC_FORBIDDEN);
                     json.put("message", "You do not have permission to access this resource.");
+                    json.put("success", false);
+                    json.put("data", null);
 
                     PrintWriter out = response.getWriter();
                     out.print(json.toString());
